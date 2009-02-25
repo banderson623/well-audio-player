@@ -7,13 +7,13 @@ var State = Class.create({
     
   set: function(key,val){
     this._read();
-    this.h.set(key,val);
+    this.h.set(key,val+"");
     this._write();
   },
   
   get: function(key){
     this._read();
-    return this.h.get(key);
+    return this.h.get(key+"");
   },
   
   // returns the hash
@@ -73,22 +73,36 @@ var LocationState = Class.create(State,{
 var CookieState = Class.create(State, {
 
   initialize: function(cookie_name) {
+    if(cookie_name === undefined) {
+      cookie_name = 'global';
+    }
     this.cookie_name = cookie_name;
     this.day_duration = 365;
     this._init();
   },
   
+  
   _serialize: function(){
     // console.log("Serializing state: " + this.h.toJSON());
-    return this.h.toJSON();
+    // return this.h.toJSON().replace(/"/g,'\\"')
+    return this.h.toJSON().baseEncode();
   },
   
   _unserialize: function(value){
     //TODO Fix this
+    var hash_before = this.h;
+    // var json_to_eval = value.replace(/\"/g,'"')
+    var json_to_eval = value.baseDecode();
     if(value) {
-      // console.log("Unserializing: " + value.inspect());
-      this.h = $H(value.evalJSON());
+      try{
+        this.h = $H(json_to_eval.evalJSON());
+      } catch(e){
+       console.log('errored: ' + e.name + ' message: ' + e.message);
+       this.h = hash_before;
+      }
+      console.log("Unserialized result: " + this.h.inspect());
     } else {
+      console.log("Couldn't unserialize");
       this.h = new Hash();
     }
       
@@ -100,8 +114,11 @@ var CookieState = Class.create(State, {
   },
   
   _read: function(){
-    // console.log('cookie value ' + this._readCookie());
-    this._unserialize(this._readCookie());
+    console.log('READ: ' + this._readCookie());
+    if(this._readCookie()){
+      // console.log("   valid data: unseralizing");
+      this._unserialize(this._readCookie());
+    }
   },
   
   
@@ -112,6 +129,7 @@ var CookieState = Class.create(State, {
   		var expires = "; expires="+date.toGMTString();
   	}
   	else var expires = "";
+  	console.log("*** WRITE: " + this.cookie_name + "=" + value + expires + "; path=/" );
   	document.cookie = this.cookie_name + "=" + value + expires + "; path=/";
   }, 
   
@@ -131,6 +149,7 @@ var CookieState = Class.create(State, {
   }, 
   
   _eraseCookie: function() {
+    console.log('--- Erasing');
   	this._createCookie("",-1);
   }
   
