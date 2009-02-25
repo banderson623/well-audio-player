@@ -19,17 +19,17 @@
 <body>
 
   <div id="testlog">...</div>
-  
-  <div style="display:none">
-    
-    <!-- For use for player testing -->
-    <div id="track"><div id="handle"></div></div>
-    <div id="current_time"></div>
-  </div>
+  <h2>Raw Cookie Value</h2>
+  <div id="cookie_value" style="word-wrap:break-word;"></div>
   
   <script src="./state_test.js" type="text/javascript" charset="utf-8"></script>
   
   <!-- <script src="javascripts/player_test.js" type="text/javascript" charset="utf-8"></script> -->
-
+  <script type="text/javascript" charset="utf-8">
+    document.observe('unload', function(){
+      alert('unloading');
+      new CookieState('audio_state')._eraseCookie();
+    });
+  </script>
 </body>
 </html>

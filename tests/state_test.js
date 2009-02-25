@@ -4,7 +4,7 @@ new Test.Unit.Runner({
     this.state_namespace = 'audio_state';
     
     // Calling a private method to setup test
-    // new CookieState(this.state_namespace)._eraseCookie();
+    new CookieState(this.state_namespace)._eraseCookie();
     this.cs = new CookieState(this.state_namespace);
     this.cs.set('cookie_should_persist',"true");
   },
@@ -28,18 +28,28 @@ new Test.Unit.Runner({
     }
     this.cs.set('random',final_string);
     this.assertEqual(this.cs.get('random'), final_string);
-  }
+  },
   
-  // testCookieWithLotsOfSets: function(){
-  //   for(var i = 0; i<=20; i++){
-  //     this.cs.set('random',final_string);
+  testCookieWith20Sets: function(){
+    for(var i = 0; i<=20; i++){
+      this.cs.set("size_" + i,(Math.random() * (Math.random() * 10)).toDecimalPrecision(2));
+    }
+    $('cookie_value').update(this.cs.rawCookie());
+    // this.showCookieValue();
+  },
+
+  // testCookieWith200Sets: function(){
+  //   for(var i = 0; i<=200; i++){
+  //     this.cs.set("size_" + i,Math.random());
   //   }
-  // }
+  // },
   
   
   // teardown: function(){
   //   new CookieState(this.state_namespace).removeAll();
+  // },
+  
+  // showCookieValue: function(){
+  //   $('cookie_value').update(this.cs.rawCookieValue())
   // }
-  
-  
 });

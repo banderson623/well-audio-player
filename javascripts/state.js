@@ -81,6 +81,15 @@ var CookieState = Class.create(State, {
     this._init();
   },
   
+  rawCookie: function(){
+    return this._readCookie();
+  },
+  
+  // This prevents us from writing too big a cookie
+  _checkSize: function(value){
+    console.log("Cookie size: " + value.length * 8);
+    return (value.length * 8) <= (1024 * 4);
+  },
   
   _serialize: function(){
     // console.log("Serializing state: " + this.h.toJSON());
@@ -123,14 +132,18 @@ var CookieState = Class.create(State, {
   
   
   _createCookie: function(value,days) {
-  	if (days) {
-  		var date = new Date();
-  		date.setTime(date.getTime()+(days*24*60*60*1000));
-  		var expires = "; expires="+date.toGMTString();
+    if(this._checkSize(value)){
+    	if (days) {
+    		var date = new Date();
+    		date.setTime(date.getTime()+(days*24*60*60*1000));
+    		var expires = "; expires="+date.toGMTString();
+    	}
+    	else var expires = "";
+    	console.log("*** WRITE: " + this.cookie_name + "=" + value + expires + "; path=/" );
+    	document.cookie = this.cookie_name + "=" + value + expires + "; path=/";
+  	} else {
+  	  console.log("WAY TO BIG");
   	}
-  	else var expires = "";
-  	console.log("*** WRITE: " + this.cookie_name + "=" + value + expires + "; path=/" );
-  	document.cookie = this.cookie_name + "=" + value + expires + "; path=/";
   }, 
   
   _readCookie: function() {
@@ -147,6 +160,8 @@ var CookieState = Class.create(State, {
   	}
   	return null;
   }, 
+  
+
   
   _eraseCookie: function() {
     console.log('--- Erasing');
